@@ -61,7 +61,7 @@ docker create \
   -v /path/to/sonarrmedia:/sonarr_root \
   -v /path/to/logs:/logs \
   --restart unless-stopped \
-  willjbrown/sonarr_yt-dlp
+  willjbrown/sonarr_yt-dlp:latest
 ```
 
 ### docker-compose
@@ -71,7 +71,7 @@ docker create \
 version: '3.4'
 services:
   sonarr_youtubedl:
-    image: willjbrown/sonarr_yt-dlp
+    image: willjbrown/sonarr_yt-dlp:latest
     container_name: sonarr_yt-dlp
     environment:
       - PUID=1000
