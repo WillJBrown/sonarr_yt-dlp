@@ -1,9 +1,9 @@
 FROM python:3.9-buster
-LABEL maintainer="Martin Jones <whatdaybob@outlook.com>"
+LABEL maintainer="William Brown <Will@WillJBrown.com>"
 
 # Update and install ffmpeg
 RUN apt-get update && \
-    apt-get install -y ffmpeg 
+    apt-get install -y ffmpeg s6
 
 # Copy and install requirements
 COPY requirements.txt requirements.txt
@@ -11,10 +11,7 @@ RUN pip3 install -r requirements.txt
 
 # create abc user so root isn't used
 RUN \
-	groupmod -g 1000 users && \
-	useradd -u 911 -U -d /config -s /bin/false abc && \
-	usermod -G users abc && \
-# create some files / folders
+    # create some files / folders
 	mkdir -p /config /app /sonarr_root /logs && \
 	touch /var/lock/sonarr_youtube.lock
 
@@ -29,11 +26,12 @@ COPY app/ /app
 # update file permissions
 RUN \
     chmod a+x \
-    /app/sonarr_youtubedl.py \ 
+    /app/sonarr_youtubedl.py \
+    /app/run.sh \
     /app/utils.py \
     /app/config.yml.template
 
 # ENV setup
 ENV CONFIGPATH /config/config.yml
 
-CMD [ "python", "-u", "/app/sonarr_youtubedl.py" ]
+CMD [ "bash", "/app/run.sh" ]

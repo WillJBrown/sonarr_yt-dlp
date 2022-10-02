@@ -80,6 +80,7 @@ class SonarrYTDL(object):
                 scheme = "https"
             self.base_url = f"{scheme}://{cfg['sonarr']['host']}:{str(cfg['sonarr']['port'])}"
             self.api_key = cfg['sonarr']['apikey']
+            self.mappings = cfg['sonarr']['rel-mappings']
         except Exception:
             sys.exit("Error with sonarr config.yml values.")
 
@@ -181,16 +182,16 @@ class SonarrYTDL(object):
         headers = {
             'Content-Type': 'application/json',
         }
-        args = (
+        arguments = (
             ('apikey', self.api_key),
         )
         if params is not None:
-            args.update(params)
+            arguments.update(params)
             logger.debug(f"Begin PUT with params: {params}")
         res = requests.post(
             url,
             headers=headers,
-            params=args,
+            params=arguments,
             json=jsondata
         )
         return res
@@ -227,6 +228,14 @@ class SonarrYTDL(object):
         series = self.get_series()
         matched = []
         for ser in series[:]:
+            for mapping in self.mappings:
+                if ser['path'].find(mapping['media-folder']) >= 0:
+                    partition = ser['path'].partition(mapping['media-folder'])
+                    if partition[0] == '' or partition[0] == os.sep:
+                        ser['modpath'] = os.path.join(partition[0], mapping['relative-path'], partition[2])
+            # print(ser['path'])
+            # if ser['modpath'] is not None:
+            #    print(ser['modpath'])
             for wnt in self.series:
                 if wnt['title'] == ser['title']:
                     # Set default values
@@ -502,18 +511,20 @@ class SonarrYTDL(object):
                                 quality = 'WEBDL'
                                 if result.get('height') in (2160, 1080, 720, 480):
                                     quality = f"WEBDL-{result['height']}p"
+                                basename = '{1} - S{0}E{2} - {3} {4}.mp4'.format(
+                                    eps['seasonNumber'],
+                                    ser['title'],
+                                    eps['episodeNumber'],
+                                    eps['title'],
+                                    quality)
+                                usedpath = os.path.normpath('sonarr_root' + os.sep + ser['path'])
+                                if ser['modpath'] is not None:
+                                    usedpath = os.path.normpath('sonarr_root' + os.sep + ser['modpath'])
                                 ytdl_format_options = {
                                     'format': self.ytdl_format,
                                     'quiet': True,
                                     'merge-output-format': 'mp4',
-                                    'outtmpl': '/sonarr_root{0}/Season {1}/{2} - S{1}E{3} - {4} {5}.mp4'.format(
-                                        ser['path'],
-                                        eps['seasonNumber'],
-                                        ser['title'],
-                                        eps['episodeNumber'],
-                                        eps['title'],
-                                        quality
-                                    ),
+                                    'outtmpl': usedpath + os.sep + basename,
                                     'progress_hooks': [ytdl_hooks],
                                     'noplaylist': True,
                                 }

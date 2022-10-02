@@ -6,8 +6,8 @@ import yaml
 import logging
 from logging.handlers import RotatingFileHandler
 
-
 CONFIGFILE = os.environ['CONFIGPATH']
+
 
 def upperescape(string):
     """ Uppercase and Escape string. 
@@ -19,37 +19,38 @@ def upperescape(string):
 
     Returns:
         str: regex escaped string
-    """    
-    # YTDL is case insensitive for ease.
-    string = string.upper() 
+    """
+    # YTDL is case-insensitive for ease.
+    string = string.upper()
     # Standardise quote characters as YTDL converts these.
-    string = string.replace('’',"'") 
-    string = string.replace('“','"')
-    string = string.replace('”','"')
+    string = string.replace('’', "'")
+    string = string.replace('“', '"')
+    string = string.replace('”', '"')
     # Escape the characters
     string = re.escape(string)
     # Make it look for and as whole or ampersands
-    string = string.replace('\\ AND\\ ','\\ (AND|&)\\ ')
+    string = string.replace('\\ AND\\ ', '\\ (AND|&)\\ ')
     # Handle some numerals being incorrect
-    string = string.replace("1","(1|I)")
-    string = string.replace("2","(2|II)")
-    string = string.replace("3","(3|III)")
-    string = string.replace("4","(4|IV)")
-    string = string.replace("5","(5|V)")
-    string = string.replace("6","(6|VI)")
-    string = string.replace("7","(7|VII)")
-    string = string.replace("8","(8|VIII)")
-    string = string.replace("9","(9|IX)")
-    string = string.replace("10","(10|X)")
+    string = string.replace("1", "(1|I)")
+    string = string.replace("2", "(2|II)")
+    string = string.replace("3", "(3|III)")
+    string = string.replace("4", "(4|IV)")
+    string = string.replace("5", "(5|V)")
+    string = string.replace("6", "(6|VI)")
+    string = string.replace("7", "(7|VII)")
+    string = string.replace("8", "(8|VIII)")
+    string = string.replace("9", "(9|IX)")
+    string = string.replace("10", "(10|X)")
     # Make punctuation optional for human error
-    string = string.replace("'","([']?)") # optional apostrophe
-    string = string.replace(",","([,]?)") # optional comma
-    string = string.replace("!","([!]?)") # optional question mark
-    string = string.replace("\\.","([\\.]?)") # optional period
-    string = string.replace("\\?","([\\?]?)") # optional question mark
-    string = string.replace(":","([:]?)") # optional colon
-    string = string.replace("–","([–-]?)") # optional hyphen U+002d
-    string = re.sub("S\\\\", "([']?)"+"S\\\\", string) # optional belonging apostrophe (has to be last due to question mark)
+    string = string.replace("'", "([']?)")  # optional apostrophe
+    string = string.replace(",", "([,]?)")  # optional comma
+    string = string.replace("!", "([!]?)")  # optional question mark
+    string = string.replace("\\.", "([\\.]?)")  # optional period
+    string = string.replace("\\?", "([\\?]?)")  # optional question mark
+    string = string.replace(":", "([:]?)")  # optional colon
+    string = string.replace("–", "([–-]?)")  # optional hyphen U+002d
+    string = re.sub("S\\\\", "([']?)" + "S\\\\",
+                    string)  # optional belonging apostrophe (has to be last due to question mark)
     return string
 
 
@@ -67,15 +68,17 @@ def checkconfig():
     config_file_exists = os.path.exists(os.path.abspath(config_file))
     if not config_file_exists:
         logger.critical('Configuration file not found.')  # print('Configuration file not found.')
-        if not config_template_exists:
+        if config_template_exists:
             os.system('cp /app/config.yml.template ' + config_template)
-        logger.critical("Create a config.yml using config.yml.template as an example.")  # sys.exit("Create a config.yml using config.yml.template as an example.")
+        logger.critical(
+            "Create a config.yml using config.yml.template as an example.")
+        # sys.exit("Create a config.yml using config.yml.template as an example.")
         sys.exit()
     else:
         logger.info('Configuration Found. Loading file.')  # print('Configuration Found. Loading file.')
         with open(
-            config_file,
-            "r"
+                config_file,
+                "r"
         ) as ymlfile:
             cfg = yaml.load(
                 ymlfile,
@@ -129,7 +132,7 @@ class YoutubeDLLogger(object):
 
 
 def ytdl_hooks_debug(d):
-    """ Debug logging hooks for Youtube DL download process.
+    """ Debug logging hooks for yt-dlp download process.
         Updates the logger with download progress percent and ETA
 
     Args:
@@ -138,14 +141,15 @@ def ytdl_hooks_debug(d):
     logger = logging.getLogger('sonarr_youtubedl')
     if d['status'] == 'finished':
         file_tuple = os.path.split(os.path.abspath(d['filename']))
-        logger.info("      Done downloading {}".format(file_tuple[1]))  # print("Done downloading {}".format(file_tuple[1]))
+        logger.info(
+            "      Done downloading {}".format(file_tuple[1]))  # print("Done downloading {}".format(file_tuple[1]))
     if d['status'] == 'downloading':
         progress = "      {} - {} - {}".format(d['filename'], d['_percent_str'], d['_eta_str'])
         logger.debug(progress)
 
 
 def ytdl_hooks(d):
-    """ Standard logging hooks for Youtube DL download process.
+    """ Standard logging hooks for yt-dlp download process.
         Updates the logger only when completed.
 
     Args:
@@ -156,8 +160,9 @@ def ytdl_hooks(d):
         file_tuple = os.path.split(os.path.abspath(d['filename']))
         logger.info("      Downloaded - {}".format(file_tuple[1]))
 
+
 def setup_logging(lf_enabled=True, lc_enabled=True, debugging=False):
-    """ Function to setup logging
+    """ Function to set up logging
 
     Args:
         lf_enabled (bool, optional): is log file enabled. Defaults to True.
@@ -166,9 +171,9 @@ def setup_logging(lf_enabled=True, lc_enabled=True, debugging=False):
 
     Returns:
         Logger: used to pass logging information to
-    """    
+    """
     log_level = logging.INFO
-    log_level = logging.DEBUG if debugging == True else log_level
+    log_level = logging.DEBUG if debugging else log_level
     logger = logging.getLogger('sonarr_youtubedl')
     logger.setLevel(log_level)
     log_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

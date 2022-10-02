@@ -6,8 +6,12 @@ sonarr:
     port: 1234
     apikey: 12341234
     ssl: false
+    # Relative mappings from sonarr_root folder to sonarr media folders
+    rel-mappings:
+        - media-folder: /tv
+          relative-path: .
 ytdl:
-  # default ytdl video format, for guidence, please see https://github.com/ytdl-org/youtube-dl#format-selection
+  # default ytdl video format, for guidance, please see https://github.com/ytdl-org/youtube-dl#format-selection
     default_format: bestvideo[ext=mp4][width<=1920]+bestaudio[ext=m4a]/bestvideo[ext=mp4][width<=1920]+bestaudio
 series:
   # Standard channel to check
