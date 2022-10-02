@@ -1,11 +1,15 @@
 # sonarr_youtubedl by [@whatdaybob](https://github.com/whatdaybob)
 
+Forked and modified by [@willjbrown](https://github.com/willjbrown)
+
 ![Docker Build](https://img.shields.io/docker/cloud/automated/whatdaybob/sonarr_youtubedl?style=flat-square)
 ![Docker Pulls](https://img.shields.io/docker/pulls/whatdaybob/sonarr_youtubedl?style=flat-square)
 ![Docker Stars](https://img.shields.io/docker/stars/whatdaybob/sonarr_youtubedl?style=flat-square)
 [![Docker Hub](https://img.shields.io/badge/Open%20On-DockerHub-blue)](https://hub.docker.com/r/whatdaybob/sonarr_youtubedl)
 
 [whatdaybob/sonarr_youtubedl](https://github.com/whatdaybob/Custom_Docker_Images/tree/master/sonarr_youtubedl) is a [Sonarr](https://sonarr.tv/) companion script to allow the automatic downloading of web series normally not available for Sonarr to search for. Using [YT-DLP](https://github.com/yt-dlp/yt-dlp) (a youtube-dl fork with added features) it allows you to download your webseries from the list of [supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
+
+This is my fork of that project.
 
 ## Features
 
@@ -30,17 +34,17 @@ Lastly be aware that this requires the TVDB to match exactly what the episodes t
 
 The architectures supported by this image are:
 
-| Architecture | Tag |
-| :----: | --- |
-| x86-64 | latest |
-| x86-64 | dev |
+| Architecture | Tag    |
+|:------------:|--------|
+|    x86-64    | latest |
+|    x86-64    | dev    |
 
 ## Version Tags
 
-| Tag | Description |
-| :----: | --- |
-| latest | Current release code |
-| dev | Pre-release code for testing issues |
+|  Tag   | Description                         |
+|:------:|-------------------------------------|
+| latest | Current release code                |
+|  dev   | Pre-release code for testing issues |
 
 ## Great how do I get started
 
@@ -50,12 +54,14 @@ Obviously it's a docker image, so you need docker. If you don't know what that i
 
 ```bash
 docker create \
-  --name=sonarr_youtubedl \
+  --name=sonarr_yt-dlp \
+  -e PUID=1000 \
+  -e PGID=1000 \
   -v /path/to/data:/config \
   -v /path/to/sonarrmedia:/sonarr_root \
   -v /path/to/logs:/logs \
   --restart unless-stopped \
-  whatdaybob/sonarr_youtubedl
+  willjbrown/sonarr_yt-dlp
 ```
 
 ### docker-compose
@@ -65,8 +71,11 @@ docker create \
 version: '3.4'
 services:
   sonarr_youtubedl:
-    image: whatdaybob/sonarr_youtubedl
-    container_name: sonarr_youtubedl
+    image: willjbrown/sonarr_yt-dlp
+    container_name: sonarr_yt-dlp
+    environment:
+      - PUID=1000
+      - PGID=1000
     volumes:
       - /path/to/data:/config
       - /path/to/sonarrmedia:/sonarr_root
@@ -75,11 +84,11 @@ services:
 
 ### Docker volumes
 
-| Parameter | Function |
-| :----: | --- |
-| `-v /config` | sonarr_youtubedl configs |
+|     Parameter     | Function                                    |
+|:-----------------:|---------------------------------------------|
+|   `-v /config`    | sonarr_youtubedl configs                    |
 | `-v /sonarr_root` | Root library location from Sonarr container |
-| `-v /logs` | log location |
+|    `-v /logs`     | log location                                |
 
 **Clarification on sonarr_root**
 
@@ -150,7 +159,7 @@ Using a site like [Regex101](https://regex101.com/) can help build regular expre
 
 ### Thanks and feedback / collaboration is always welcome!
 
-If I helped in anyway and you would like to help me, consider donating a lovely beverage with the below.
+Consider donating a beverage to the original author with the below.
 
 <!-- markdownlint-disable MD033 -->
 <a href="https://www.buymeacoffee.com/whatdaybob" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/lato-black.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
