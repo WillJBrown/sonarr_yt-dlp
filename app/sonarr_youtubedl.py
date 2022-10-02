@@ -517,9 +517,10 @@ class SonarrYTDL(object):
                                     eps['episodeNumber'],
                                     eps['title'],
                                     quality)
-                                usedpath = os.path.normpath('sonarr_root' + os.sep + ser['path'])
+                                usedpath = os.path.normpath('/sonarr_root' + os.sep + ser['path'])
                                 if ser['modpath'] is not None:
-                                    usedpath = os.path.normpath('sonarr_root' + os.sep + ser['modpath'])
+                                    usedpath = os.path.normpath('/sonarr_root' + os.sep + ser['modpath'])
+                                os.makedirs(usedpath, exist_ok = True)
                                 ytdl_format_options = {
                                     'format': self.ytdl_format,
                                     'quiet': True,

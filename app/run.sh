@@ -11,7 +11,6 @@ groupmod -g "$PGID" users
 useradd -u "$PUID" -U -d /config -s /bin/false abc
 usermod -a -G users abc
 usermod -g users abc
-id abc
 
 chown -R abc:users /config /app /logs
 
