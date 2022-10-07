@@ -62,5 +62,5 @@ jobs:
           push: true
           context: .
           file: ./Dockerfile
-          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
+          platforms: linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/sonarr_youtubedl:${{ steps.tag.outputs.tag }}
