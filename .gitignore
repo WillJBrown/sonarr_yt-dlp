@@ -1,14 +1,7 @@
 # Local testing files
-env/
-__pycache__/
-*.backup
-.venv
-*_cookies.txt
-sonarr_root/
-config/config.yml
-config/config.yml.template
-logs/
-/TestDir/
-/.idea/
-/Pipfile.lock
 requirements.txt
+/Pipfile.lock
+/.devcontainer/
+/.vscode/
+/.idea/
+/TestDir/
