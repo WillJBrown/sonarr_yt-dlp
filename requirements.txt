@@ -1,4 +1,0 @@
-requests==2.25.1
-yt-dlp==2022.4.8
-pyyaml==5.4.1
-schedule==1.1.0

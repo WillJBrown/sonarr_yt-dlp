@@ -7,6 +7,7 @@ RUN apt-get update && \
 
 # Copy and install requirements
 COPY requirements.txt requirements.txt
+RUN /usr/local/bin/python -m pip install --upgrade pip
 RUN pip3 install -r requirements.txt
 
 # create abc user so root isn't used

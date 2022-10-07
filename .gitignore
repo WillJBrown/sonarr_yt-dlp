@@ -11,3 +11,4 @@ logs/
 /TestDir/
 /.idea/
 /Pipfile.lock
+requirements.txt
