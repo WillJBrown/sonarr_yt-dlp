@@ -1,7 +1,10 @@
+__pycache__/
 # Local testing files
+/TestDir/
+/.devcontainer/
+# Build Files
 requirements.txt
 /Pipfile.lock
-/.devcontainer/
+# IDE directories
 /.vscode/
 /.idea/
-/TestDir/
