@@ -250,7 +250,7 @@ class SonarrYTDL(object):
                 episode['episodeNumber'],
                 episode['title'],
                 quality)
-        logger.info(f"Folder: {foldername}\nFilename: {basename}")
+        logger.debug(f"Folder: {foldername}\nFilename: {basename}")
         return foldername, basename
 
 
