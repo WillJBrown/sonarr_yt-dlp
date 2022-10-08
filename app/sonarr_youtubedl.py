@@ -40,6 +40,7 @@ class SonarrYTDL(object):
         self.cfg_sonarr(cfg)
         self.cfg_series(cfg)
         self.cfg_ytdl(cfg)
+        self.naming_format = self.get_naming_format()
 
     def cfg_sonarrytdl(self, cfg):
         """Loads main configuration
@@ -114,11 +115,12 @@ class SonarrYTDL(object):
         if response.status_code != 200:
             sys.exit('Issue communicating with sonarr!')
         elif response.status_code == 200:
-            if isinstance(response.json(), list):
+            if isinstance(response.json(), list) or isinstance(response.json(), dict):
                 return response.json()
             # If sonarr is available but doesn't return a list
             # This can happen when errors like disk space occur
             else:
+                logger.debug(f'Error response received:\n {response.json()}')
                 sys.exit('Sonarr available but error received.')
 
     def get_episodes_by_series_id(self, series_id):
@@ -134,6 +136,16 @@ class SonarrYTDL(object):
         logger.debug(f'Sonarr: Request episodes for series_id: {series_id}')
         args = {'seriesId': series_id}
         res = self.request_get(f"{self.base_url}/api/episode", args)
+        return self.sonarr_response_handler(res)
+
+    def get_naming_format(self):
+        """Returns the file naming format for your collection
+
+        Returns:
+            Naming format as dictionary
+        """
+        logger.debug(f'Sonarr: Request naming format')
+        res = self.request_get(f"{self.base_url}/api/v3/config/naming")
         return self.sonarr_response_handler(res)
 
     def get_series(self):
@@ -195,6 +207,52 @@ class SonarrYTDL(object):
             json=jsondata
         )
         return res
+
+    def namefile(self, series, episode, quality):
+        if self.naming_format['renameEpisodes']:
+            foldername = self.naming_format['seasonFolderFormat']
+            if '{season:00}' in foldername:
+                foldername = foldername.replace('{season:00}', str(episode['seasonNumber']).zfill(2))
+            elif '{season:0}' in foldername:
+                foldername = foldername.replace('{season:0}', episode['seasonNumber'])
+            filename = self.naming_format['standardEpisodeFormat']
+            if '{season:00}' in filename:
+                filename = filename.replace('{season:00}', str(episode['seasonNumber']).zfill(2))
+            elif '{season:0}' in filename:
+                filename = filename.replace('{season:0}', episode['seasonNumber'])
+            if '{episode:00}' in filename:
+                filename = filename.replace('{episode:00}', str(episode['episodeNumber']).zfill(2))
+            elif '{episode:0}' in filename:
+                filename = filename.replace('{episode:0}', episode['episodeNumber'])
+            if '{Series Title}' in filename:
+                filename = filename.replace('{Series Title}', series['title'])
+            elif '{Series CleanTitle}' in filename:
+                filename = filename.replace('{Series CleanTitle}', series['title'])
+            elif '{Series TitleYear}' in filename:
+                filename = filename.replace('{Series TitleYear}', series['title'] + ' (' + str(series['year']) + ')')
+            elif '{Series CleanTitleYear}' in filename:
+                filename = filename.replace('{Series CleanTitleYear}', series['title'] + ' (' + str(series['year']) + ')')
+            if '{Episode Title}' in filename:
+                filename = filename.replace('{Episode Title}', episode['title'])
+            elif '{Episode CleanTitle}' in filename:
+                filename = filename.replace('{Episode CleanTitle}', episode['title'])
+            if '{Quality Title}' in filename:
+                filename = filename.replace('{Quality Title}', quality)
+            elif '{Quality Full}' in filename:
+                filename = filename.replace('{Quality Full}', quality)
+            filename = re.sub("\{.*?\}", '', filename)
+            basename = filename + '.mp4'
+        else:
+            foldername = '.'
+            basename = '{1} - S{0}E{2} - {3} {4}.mp4'.format(
+                episode['seasonNumber'],
+                series['title'],
+                episode['episodeNumber'],
+                episode['title'],
+                quality)
+        logger.info(f"Folder: {foldername}\nFilename: {basename}")
+        return foldername, basename
+
 
     def rescanseries(self, series_id):
         """Refresh series information from trakt and rescan disk
@@ -511,16 +569,14 @@ class SonarrYTDL(object):
                                 quality = 'WEBDL'
                                 if result.get('height') in (2160, 1080, 720, 480):
                                     quality = f"WEBDL-{result['height']}p"
-                                basename = '{1} - S{0}E{2} - {3} {4}.mp4'.format(
-                                    eps['seasonNumber'],
-                                    ser['title'],
-                                    eps['episodeNumber'],
-                                    eps['title'],
-                                    quality)
+                                foldername, basename = self.namefile(ser, eps, quality)
+                                if foldername != '.':
+                                    os.makedirs(foldername, exist_ok=True)
+                                    basename = os.path.join(foldername, basename)
                                 usedpath = os.path.normpath('/sonarr_root' + os.sep + ser['path'])
                                 if ser['modpath'] is not None:
                                     usedpath = os.path.normpath('/sonarr_root' + os.sep + ser['modpath'])
-                                os.makedirs(usedpath, exist_ok = True)
+                                os.makedirs(usedpath, exist_ok=True)
                                 ytdl_format_options = {
                                     'format': self.ytdl_format,
                                     'quiet': True,
