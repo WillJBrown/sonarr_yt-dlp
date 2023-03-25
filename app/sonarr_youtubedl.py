@@ -27,7 +27,7 @@ logger = setup_logging(True, True, args.debug)
 date_format = "%Y-%m-%dT%H:%M:%SZ"
 now = datetime.now()
 
-CONFIGFILE = os.environ['CONFIGFILE'] if 'CONFIGFILE' in os.environ else 'config.yml'
+CONFIGFILE = os.environ['CONFIGPATH']
 CONFIGPATH = CONFIGFILE.replace('config.yml', '')
 SCANINTERVAL = 60
 
@@ -270,7 +270,7 @@ class SonarrYTDL(object):
             "seriesId": str(series_id)
         }
         res = self.request_put(
-            f"{self.base_url}/api/v3/command",
+            f"{self.base_url}/api/command",
             None,
             data
         )
